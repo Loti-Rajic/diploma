@@ -1,3 +1,4 @@
+import os
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -70,8 +71,9 @@ def process_file(file_path):
         return f"Napaka pri branju datoteke: {str(e)}"
 
 # Pot do datoteke
-file_path = "vsebina.txt"
-anonimizirano, rezultat = process_file(file_path)
+for file in "D:\\faks\\fri-fu\\diploma\\aplikacija\\24ur_articles".listdir():
+    file_path = file
+    process_file(file_path)
 
 # Zapis v datoteko
 with open("rezultat.txt", "w", encoding="utf-8") as file:
