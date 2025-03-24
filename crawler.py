@@ -61,7 +61,7 @@ def get_article_content(article_url):
 def save_article(title, content, index):
     """ Shrani vsebino članka v .txt datoteko """
     safe_title = "".join(c if c.isalnum() else "_" for c in title)[:50]  # Prilagodi ime datoteke
-    file_path = os.path.join(SAVE_DIR, f"{index}_{safe_title}.txt")
+    file_path = os.path.join(SAVE_DIR, f"{safe_title}.txt")
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(title + "\n\n" + content)

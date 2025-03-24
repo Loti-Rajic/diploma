@@ -3,54 +3,40 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 import spacy
-import sl_core_news_trf
 
-# Nalaganje modela
+# Nalaganje slovenskega modela
 nlp = spacy.load("sl_core_news_trf")
 
-# Slovar za pretvorbo angleških oznak v slovenske
-pos_translation = {
-    "NOUN": "samostalnik",
-    "VERB": "glagol",
-    "ADJ": "pridevnik",
-    "ADV": "prislov",
-    "PRON": "zaimek",
-    "PROPN": "lastno ime",
-    "DET": "členek",
-    "ADP": "predlog",
-    "CCONJ": "veznik",
-    "SCONJ": "podredni veznik",
-    "NUM": "števnik",
-    "PART": "členek",
-    "INTJ": "medmet",
-    "PUNCT": "ločilo",
-    "SYM": "simbol",
-    "X": "drugo"
-}
-
-# Funkcija za anonimizacijo entitet v besedilu
-def anonymize_entities(text):
-    doc = nlp(text)
-    anonymized_text = []
+# Funkcija za anonimizacijo entitet
+def anonymize_entities(doc):
+    anonymized_tokens = []
+    skip_next = False
     
-    for ent in doc.ents:
-        if ent.label_ == "PER":
-            anonymized_text.append(f"[IME]")
-        elif ent.label_ == "LOC":
-            anonymized_text.append(f"[KRAJ]")
-        elif ent.label_ == "ORG":
-            anonymized_text.append(f"[ORGANIZACIJA]")
-        else:
-            anonymized_text.append(ent.text)  # Če je entiteta druge vrste, jo ohranimo
-    
-    # Vzpostavi besedilo z zamenjanimi entitetami
     for token in doc:
-        if token.ent_iob_ == "O":  # Če ni del entitete
-            anonymized_text.append(token.text)
+        if skip_next:
+            skip_next = False
+            continue
+        
+        if token.ent_type_ == "PER":
+            anonymized_tokens.append("[IME]")
+            if token.whitespace_:
+                anonymized_tokens.append(" ")
+        elif token.ent_type_ == "LOC":
+            anonymized_tokens.append("[KRAJ]")
+            if token.whitespace_:
+                anonymized_tokens.append(" ")
+        elif token.ent_type_ == "ORG":
+            anonymized_tokens.append("[ORGANIZACIJA]")
+            if token.whitespace_:
+                anonymized_tokens.append(" ")
+        else:
+            anonymized_tokens.append(token.text)
+            if token.whitespace_:
+                anonymized_tokens.append(" ")
     
-    return " ".join(anonymized_text)
+    return ''.join(anonymized_tokens)
 
-# Preberi besedilo iz datoteke
+# Preberi in obdelaj besedilo iz datoteke
 def process_file(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -58,23 +44,29 @@ def process_file(file_path):
 
         # Obdelaj besedilo z modelom spaCy
         doc = nlp(text)
-        
+
         # Anonimiziraj imenovane entitete
-        anonymized_text = anonymize_entities(text)
-        
-        # Pretvori oznake delov govora v slovenske izraze
-        tokens_pos = [(w.text, pos_translation.get(w.pos_, w.pos_)) for w in doc]
-        
-        return anonymized_text, tokens_pos
+        anonymized_text = anonymize_entities(doc)
+
+        # Shranjuj anonimizirano besedilo v novo datoteko
+        filename=file_path.replace(".txt", "")
+        output_path = f"{filename}_anonimizirano.txt"
+        with open(output_path, "w", encoding="utf-8") as out_file:
+            out_file.write(anonymized_text)
+            
+        return output_path
 
     except Exception as e:
         return f"Napaka pri branju datoteke: {str(e)}"
 
-# Pot do datoteke
-for file in "D:\\faks\\fri-fu\\diploma\\aplikacija\\24ur_articles".listdir():
-    file_path = file
-    process_file(file_path)
+# Pot do direktorija
+directory = "D:\\faks\\fri-fu\\diploma\\aplikacija\\24ur_articles"
 
-# Zapis v datoteko
-with open("rezultat.txt", "w", encoding="utf-8") as file:
-    file.write(f"Anonimizirano besedilo:\n{anonimizirano}\n\nOznake:\n{rezultat}")
+# Uporabi os.listdir() za pridobitev seznama datotek v direktoriju
+files = os.listdir(directory)
+
+# Zdaj lahko iteriraš čez seznam datotek
+for file in files:
+    file_path = os.path.join(directory, file)
+    output_path = process_file(file_path)
+    print(f"Obdelana datoteka shranjena kot {output_path}")
