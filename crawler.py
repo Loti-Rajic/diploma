@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import feedparser
 
 # Nastavimo osnovni URL in direktorij za shranjevanje člankov
-BASE_URL = "https://www.24ur.com/popin"
+BASE_URL = "https://www.24ur.com"
 SAVE_DIR = "24ur_articles"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
