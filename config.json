@@ -1,6 +1,8 @@
 {
-    "PER": "[IME]",
-    "LOC": "[KRAJ]",
-    "ORG": "[ORGANIZACIJA]",
-    "DATE": "[DATUM]"
+    "PER": "OSEBA",
+    "LOC": "KRAJ",
+    "ORG": "ORGANIZACIJA",
+    "DATE": "DATUM",
+    "TIME": "ČAS",
+    "MISC": "DRUGO"
 }
